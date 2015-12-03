@@ -3,11 +3,8 @@ import dataParser
 
 #bucket ranges for different metrics
 buckets = dict()
-buckets[0] = [(0,10),(10,20),(20,30),(30,100),(100,1000)]
-buckets[1] = [(0,10),(10,20),(20,30),(30,100),(100,1000)]
-buckets[2] = [(0,10),(10,20),(20,30),(30,100),(100,1000)]
-buckets[3] = [(0,10),(10,20),(20,30),(30,100),(100,1000)]
-buckets[4] = [(0,10),(10,20),(20,30),(30,100),(100,1000)]
+for i in range(55):
+	buckets[i] = [0,-50,-40,-30,-20,-10,10,20,30,40,50,10000000]
 
 #take data and put it into buckets defined somewhere else
 class state():
@@ -22,11 +19,16 @@ class state():
 		for i in range(1, len(data)):
 			bucketRanges = buckets[i]
 			dataVal = data[i]
-			for j in range(len(bucketRanges)):
-				if (i < bucketRanges[j][1]):
-					stateDef += [j]
+			if (dataVal == None):
+				stateDef += [0]
+			else:
+				for j in range(1,len(bucketRanges)):
+					if (i < bucketRanges[j]):
+						stateDef += [j]
 		self.stateDef = tuple(stateDef)
 	def getScore(self):
+		if (self.newPrice == None or self.curPrice == None):
+			return 0.0
 		priceChange = self.newPrice - self.curPrice
 		return priceChange
 	#-1 = predict lower price, 1 = predict higher price
@@ -37,20 +39,79 @@ class state():
 agent = actualQ.innerQAgent()
 #The function that runs the inner Q-learning
 def run():
-	#loop through some subset of the dataset
-	observation = dataParser.getObservation()
-	initialState = state(observation)
-	agent.registerInitialState(initialState)
-	keepRunning = True
-	while (keepRunning):
-		observation = dataParser.getObservation()
-		curState = state(observation)
-		agent.observationFunction(curState)
-		keepRunning = False
+	initialized = False
+	# open data row by row to avoid memory overflow
+	fname = 'data_cleaned.csv'
+	with open(fname, 'r+') as f:
+		# this reads in one line at a time from stdin
+		date_previous = None 
+		ticker_previous = None
 
-	observation = dataParser.getObservation()
-	finalState = state(observation)
-	agent.final(finalState)
+		observation = {}
+		observationPrevious = {}
+
+		lineo = 0
+
+		for i, line in enumerate(f):
+			#print line
+			fList = line.split(",")
+			date = fList[0]
+			value = float(fList[1])
+			ticker = str(fList[2])
+			fundamental = str(fList[3])
+
+			# if lineo == 100000:
+			# 	break
+
+			if ticker_previous == None:
+				ticker_previous = ticker
+				date_previous = date
+
+			if date == date_previous:
+				observation[fundamental] = value
+
+			if date != date_previous:
+				lineo += 1
+				#print observation
+				observedData = dataParser.getObservation(observation, observationPrevious)
+
+				observationPrevious = observation
+				observation = {}
+				observation[fundamental] = value
+
+				date_previous = date
+
+				curState = state(observedData)
+				if (not initialized):
+					initialized = True
+					agent.registerInitialState(curState)
+				else:
+					agent.observationFunction(curState)
+					if (i % 100000 == 0):
+						print "HERE"
+						agent.final(curState)
+					elif (i % 100 == 0):
+						print "HERE NOW"
+						agent.stopEpisode()
+						initialized = False
+
+
+
+
+	# #loop through some subset of the dataset
+	# observation = dataParser.getObservation()
+	# initialState = state(observation)
+	# agent.registerInitialState(initialState)
+	# keepRunning = True
+	# while (keepRunning):
+	# 	observation = dataParser.getObservation()
+	# 	curState = state(observation)
+	# 	agent.observationFunction(curState)
+	# 	keepRunning = False
+
+	# observation = dataParser.getObservation()
+	# finalState = state(observation)
+	# agent.final(finalState)
 
 run()
 

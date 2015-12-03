@@ -19,7 +19,7 @@ class innerQAgent():
     #    Override These Functions      #
     ####################################
 
-    def __init__(self, actionFn = None, numTraining=100, epsilon=0.5, alpha=0.5, gamma=1):
+    def __init__(self, actionFn = None, numTraining=1000, epsilon=0.2, alpha=0.5, gamma=1):
         """
         actionFn: Function which takes a state and returns the list of legal actions
 
@@ -50,6 +50,8 @@ class innerQAgent():
           or the Q node value otherwise
         """
         "*** YOUR CODE HERE ***"
+        if ((self.q_values)[(state, action)] == 0):
+        	print "new State"
         return self.q_values[(state, action)]
 
 
@@ -182,6 +184,7 @@ class innerQAgent():
             # Take off the training wheels
             self.epsilon = 0.0    # no exploration
             self.alpha = 0.0      # no learning
+        print self.accumTrainRewards
 
     def isInTraining(self):
         return self.episodesSoFar < self.numTraining
@@ -237,12 +240,12 @@ class innerQAgent():
         """
           Called by Pacman game at the terminal state
         """
-        if ((self.lastAction) == 1):
-            	deltaReward = state.getScore()
-        else:
-            	deltaReward = state.getScore() * -1
-        self.observeTransition(self.lastState, self.lastAction, state, deltaReward)
-        self.stopEpisode()
+        # if ((self.lastAction) == 1):
+        #     	deltaReward = state.getScore()
+        # else:
+        #     	deltaReward = state.getScore() * -1
+        # self.observeTransition(self.lastState, self.lastAction, state, deltaReward)
+        # self.stopEpisode()
 
         print self.accumTrainRewards
 
