@@ -8,6 +8,8 @@ import numpy as np
 
 xArray = []
 yArray = []
+numToRun = 10
+numFactors = 55
 
 class state():
 	def __init__(self, values):
@@ -79,8 +81,14 @@ def run():
 					priceChange = curState.getScore()
 					# reward = action * priceChange
 					# agent.update(reward, curState, action)
-
-					createArray(observedData[0], priceChange)
+					oldPrice = observedData[1]
+					newPrice = observedData[2]
+					priceDiffPercent = 0
+					if (oldPrice == None or newPrice == None or oldPrice <= 0 or newPrice <= 0):
+						priceDiffPercent = 0
+					else:
+						priceDiffPercent = (float(newPrice) + float(oldPrice)) / float(oldPrice)
+					createArray(observedData[0], priceDiffPercent)
 					counter += 1
 					#print observation
 					#print observationPrevious
@@ -101,7 +109,7 @@ def run():
 				value = 0
 			observation[fundamental] = value
 
-			if (counter == 25):
+			if (counter == numToRun):
 				print "asda"
 				#print xArray
 				#print yArray
@@ -222,11 +230,10 @@ def deeplearning ():
 	np.random.seed(1)
 
 	# randomly initialize our weights with mean 0
-	syn0 = 2*np.random.random((55,25)) - 1
-	syn1 = 2*np.random.random((25,1)) - 1
+	syn0 = 2*np.random.random((numFactors,numToRun)) - 1
+	syn1 = 2*np.random.random((numToRun,1)) - 1
 
 	for j in xrange(60000):
-
 		# Feed forward through layers 0, 1, and 2
 		#print X
 		#l0 is 10 by 55
@@ -241,6 +248,9 @@ def deeplearning ():
 		l2_error = Y.T - l2
 		
 		if (j% 10000) == 0:
+			# print l0
+			# print Y
+			# print syn0
 			print "Error:" + str(np.mean(np.abs(l2_error)))
 			
 		# in what direction is the target value?
