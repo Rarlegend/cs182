@@ -1,12 +1,12 @@
-import actualQ
+import myownq
 import dataParser
 
 #bucket ranges for different metrics
 buckets = dict()
 for i in range(55):
 	#buckets[i] = [0,-50,-40,-30,-20,-10,10,20,30,40,50,10000000]
-	buckets[i] = [0,10000000]
-	#buckets[i] = [0,-10,-6,-3,-2,-1,-0.5,0,0.5,1,1.5,2,2.5,3,6,10,10000000]
+	#buckets[i] = [0,10000000]
+	buckets[i] = [0,-10,-6,-3,-2,-1,-0.5,0,0.5,1,1.5,2,2.5,3,6,10,10000000]
 
 #take data and put it into buckets defined somewhere else
 class state():
@@ -35,7 +35,7 @@ class state():
 	def getScore(self):
 		if (self.newPrice == None or self.curPrice == None):
 			return 0.0
-		priceChange = float(self.newPrice - self.curPrice) / float(self.curPrice)
+		priceChange = float(self.newPrice - self.curPrice) 
 		return priceChange
 	#-1 = predict lower price, 1 = predict higher price
 	def getLegalActions(self):
@@ -43,7 +43,7 @@ class state():
 	def getDef(self):
 		return self.stateDef
 
-agent = actualQ.innerQAgent()
+agent = myownq.qAgent()
 #The function that runs the inner Q-learning
 def run():
 	initialized = False
@@ -89,38 +89,16 @@ def run():
 				date_previous = date
 
 				curState = state(observedData)
-				if (not initialized):
-					initialized = True
-					print "register initial"
-					agent.registerInitialState(curState)
-				else:
-					#print "called observe function"
-					agent.observationFunction(curState)
-					if (i % 100000 == 0):
-						print "HERE"
-						agent.final(curState)
-					elif (i % 100 == 0):
-						print "HERE NOW"
-						agent.stopEpisode()
-						initialized = False
+				action = agent.getAction(curState)
+				priceChange = curState.getScore()
+				reward = action * priceChange
+				agent.update(reward, curState, action)
+				print agent.getPercentCorrect()
+				print agent.getTotalRewards()
 
+				if (i%200000 == 0):
+					agent.finish()
 
-
-
-	# #loop through some subset of the dataset
-	# observation = dataParser.getObservation()
-	# initialState = state(observation)
-	# agent.registerInitialState(initialState)
-	# keepRunning = True
-	# while (keepRunning):
-	# 	observation = dataParser.getObservation()
-	# 	curState = state(observation)
-	# 	agent.observationFunction(curState)
-	# 	keepRunning = False
-
-	# observation = dataParser.getObservation()
-	# finalState = state(observation)
-	# agent.final(finalState)
 
 run()
 

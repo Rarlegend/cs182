@@ -40,6 +40,8 @@ class innerQAgent():
         self.epsilon = float(epsilon)
         self.alpha = float(alpha)
         self.discount = float(gamma)
+        self.totalRight = float(0)
+        self.totalWrong = float(0)
 
         self.q_values = util.Counter()
 
@@ -50,9 +52,19 @@ class innerQAgent():
           or the Q node value otherwise
         """
         "*** YOUR CODE HERE ***"
-        if ((self.q_values)[(state, action)] == 0):
-        	print "new State"
-        return self.q_values[(state, action)]
+        print self.q_values.keys()
+        if ((self.q_values)[(state.getDef(), action)] != 0):
+        	#print (self.q_values[(state.getDef(), action)])
+        	#print state.getDef()
+         	print "old State"
+         	#print state.getDef()
+        else:
+        	print "new state"
+        	#print action
+        	print state.getDef()
+        	#print self.q_values.keys()
+        #print self.q_values
+        return self.q_values[(state.getDef(), action)]
 
 
     def computeValueFromQValues(self, state):
@@ -65,9 +77,11 @@ class innerQAgent():
         "*** YOUR CODE HERE ***"
         actions = self.getLegalActions(state)
         if len(actions) == 0:
-            return 0.0
+        	print "NO LENGTH"
+        	return 0.0
         maxVal = float("-inf")
         for action in actions:
+            print "action"
             qVal = self.getQValue(state, action)
             if qVal > maxVal: 
                 maxVal = qVal
@@ -128,7 +142,9 @@ class innerQAgent():
         else:
             sample = reward + (self.discount * max([self.getQValue(nextState, next_action) for next_action in self.getLegalActions(nextState)]))
         addVal = (1 - self.alpha) * self.getQValue(state, action) + self.alpha * sample
-        self.q_values[(state, action)] = addVal
+        #print "in update"
+        #print state.getDef()
+        self.q_values[(state.getDef(), action)] = addVal
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
@@ -161,6 +177,7 @@ class innerQAgent():
         	self.numTrainingRight += 1
         else:
         	self.numTestingRight += 1
+        #print "observed transition"
         self.update(state,action,nextState,deltaReward)
 
     def startEpisode(self, state):
@@ -185,6 +202,7 @@ class innerQAgent():
             self.epsilon = 0.0    # no exploration
             self.alpha = 0.0      # no learning
         print self.accumTrainRewards
+        print (float(self.totalRight) / float(self.totalRight + self.totalWrong))
 
     def isInTraining(self):
         return self.episodesSoFar < self.numTraining
@@ -228,6 +246,11 @@ class innerQAgent():
             	reward = state.getScore()
             else:
             	reward = state.getScore() * -1
+            if (reward > 0):
+            	self.totalRight += 1
+            else:
+            	self.totalWrong += 1
+            #print "observed function"
             self.observeTransition(self.lastState, self.lastAction, state, reward)
         return state
 
@@ -248,6 +271,7 @@ class innerQAgent():
         # self.stopEpisode()
 
         print self.accumTrainRewards
+        print (float(self.totalRight) / float(self.totalRight + self.totalWrong))
 
         # Make sure we have this var
         if not 'episodeStartTime' in self.__dict__:

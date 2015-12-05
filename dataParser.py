@@ -1,6 +1,7 @@
 import json 
 import csv
 import collections
+import sys
 
 # parse through data
 def getPercentChanges(start, end):
@@ -9,8 +10,22 @@ def getPercentChanges(start, end):
 		if (start[i] == None or end[i] == None or start[i] == float(0) or end[i] == float(0)):
 			percentChanges.append(None)
 		else:
-			diff = float(end[i] - start[i]) / float(start[i]) * 100
+			diff = 0
+			if (end[i] < 0 and start[i] < 0):
+				start[i] = abs(start[i])
+				end[i] = abs(end[i])
+			elif (end[i] < 0):
+				diff = 0
+			elif (start[i] < 0):
+				diff = 0
+			else:
+				diff = float(end[i] - start[i]) / float(start[i]) * 100
+			if (diff < -100):
+				print end[i]
+				print start[i]
+				sys.exit("WTF")
 			percentChanges.append(diff)
+	#print percentChanges
 	return percentChanges
 
 def getItems(sortedDict):
@@ -26,7 +41,8 @@ def getObservation(data1, data2):
 	#make sure to add a check to make sure both observations have all the data
 
 	keys = ['"ACCOCI"', '"ASSETS"', '"ASSETSC"', '"ASSETSNC"', '"BVPS"', '"CAPEX"', '"CASHNEQ"', '"COR"', '"CURRENTRATIO"', '"DE"', '"DEBT"', '"DEPAMOR"', '"DILUTIONRATIO"', '"DPS"', '"EBIT"', '"EBITDA"', '"EBT"', '"EPS"', '"EPSDIL"', '"EQUITY"', '"FCF"', '"FCFPS"', '"GP"', '"INTANGIBLES"', '"INTEXP"', '"INVENTORY"', '"LIABILITIES"', '"LIABILITIESC"', '"LIABILITIESNC"', '"NCF"', '"NCFCOMMON"', '"NCFDEBT"', '"NCFDIV"', '"NCFF"', '"NCFI"', '"NCFO"', '"NCFX"', '"NETINC"', '"NETINCCMN"', '"NETINCDIS"', '"PAYABLES"', '"PB"', '"PREFDIVIS"', '"PRICE"', '"RECEIVABLES"', '"RETEARN"', '"REVENUE"', '"RND"', '"SGNA"', '"SHARESWA"', '"SHARESWADIL"', '"TANGIBLES"', '"TAXEXP"', '"TBVPS"', '"WORKINGCAPITAL"']
-	
+	#keys = ['"PRICE"']
+
 	# Price removed
 	#keys = ['"ACCOCI"', '"ASSETS"', '"ASSETSC"', '"ASSETSNC"', '"BVPS"', '"CAPEX"', '"CASHNEQ"', '"COR"', '"CURRENTRATIO"', '"DE"', '"DEBT"', '"DEPAMOR"', '"DILUTIONRATIO"', '"DPS"', '"EBIT"', '"EBITDA"', '"EBT"', '"EPS"', '"EPSDIL"', '"EQUITY"', '"FCF"', '"FCFPS"', '"GP"', '"INTANGIBLES"', '"INTEXP"', '"INVENTORY"', '"LIABILITIES"', '"LIABILITIESC"', '"LIABILITIESNC"', '"NCF"', '"NCFCOMMON"', '"NCFDEBT"', '"NCFDIV"', '"NCFF"', '"NCFI"', '"NCFO"', '"NCFX"', '"NETINC"', '"NETINCCMN"', '"NETINCDIS"', '"PAYABLES"', '"PB"', '"PREFDIVIS"', '"RECEIVABLES"', '"RETEARN"', '"REVENUE"', '"RND"', '"SGNA"', '"SHARESWA"', '"SHARESWADIL"', '"TANGIBLES"', '"TAXEXP"', '"TBVPS"', '"WORKINGCAPITAL"']
 
