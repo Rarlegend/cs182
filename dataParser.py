@@ -76,4 +76,7 @@ def getObservation(data1, data2):
 	curPrice = data1Complete['"PRICE"']
 	nextPrice = data2Complete['"PRICE"']
 	
+	# print "DATA"
+	# print data1
+	# print data2
 	return [percentChanges, curPrice, nextPrice]

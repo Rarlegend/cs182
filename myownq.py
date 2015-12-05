@@ -16,21 +16,29 @@ class qAgent():
 
     def getQValue(self, state, action):
     	value = self.qValues[(state.getDef(), action)]
-    	if (value == 0):
-    		print "new state"
-    	else:
-    		print "old state"
+    	# print action
+    	# if (value == 0):
+    	# 	print "new state"
+    	# 	print action
+    	# 	print state.getDef()
+    	# else:
+    	# 	print "old state"
         return value
 
     def computeActionFromQValues(self, state):
         maxAction = None
         maxVal = 0
-        for action in state.getLegalActions():
+        actions = state.getLegalActions()
+        for action in actions:
+            # print action
             qVal = self.getQValue(state, action)
             if qVal > maxVal or maxAction is None:
                 maxVal = qVal
                 maxAction = action
-        return maxAction
+        if (maxVal == 0):
+        	return random.choice(actions)
+        else:
+        	return maxAction
 
     def getAction(self, state):
         legalActions = state.getLegalActions()
@@ -50,6 +58,8 @@ class qAgent():
             # self.totalRewards += 1
         self.alpha = float(1 - (float(self.numCorrect + self.numWrong) / float(self.numTraining)))
         addVal = (1 - self.alpha) * self.getQValue(state, action) + self.alpha * sample
+        # print "add"
+        # print addVal
         self.qValues[(state.getDef(), action)] = addVal
 
     def getPercentCorrect(self):

@@ -1,11 +1,12 @@
 import myownq
 import dataParser
+import copy
 
 #bucket ranges for different metrics
 buckets = dict()
 for i in range(55):
 	#buckets[i] = [0,-50,-40,-30,-20,-10,10,20,30,40,50,10000000]
-	#buckets[i] = [0,10000000]
+	# buckets[i] = [0,10000000]
 	buckets[i] = [0,-10,-6,-3,-2,-1,-0.5,0,0.5,1,1.5,2,2.5,3,6,10,10000000]
 
 #take data and put it into buckets defined somewhere else
@@ -56,6 +57,7 @@ def run():
 
 		observation = {}
 		observationPrevious = {}
+		isFirstObservation = True
 
 		lineo = 0
 
@@ -67,37 +69,75 @@ def run():
 			ticker = str(fList[2])
 			fundamental = str(fList[3])
 
+
+			if (date_previous == None):
+				date_previous = date
+			elif (date_previous != date):
+				if (not isFirstObservation):
+					#break
+					observedData = dataParser.getObservation(observationPrevious, observation)
+					curState = state(observedData)
+					action = agent.getAction(curState)
+					priceChange = curState.getScore()
+					reward = action * priceChange
+					agent.update(reward, curState, action)
+					#print observation
+					#print observationPrevious
+					print agent.getPercentCorrect()
+					print agent.getTotalRewards()
+				else:
+					isFirstObservation = False
+				observationPrevious = copy.deepcopy(observation)
+				observation = {}
+				date_previous = date
+
+			if (ticker_previous == None):
+				ticker_previous = ticker
+			elif (ticker_previous != ticker):
+				isFirstObservation = True
+				ticker_previous = ticker
+
+			observation[fundamental] = value
+			#print observation
+			#print observationPrevious
+
 			# if lineo == 100000:
 			# 	break
 
-			if ticker_previous == None:
-				ticker_previous = ticker
-				date_previous = date
 
-			if date == date_previous:
-				observation[fundamental] = value
 
-			if date != date_previous:
-				lineo += 1
-				#print observation
-				observedData = dataParser.getObservation(observation, observationPrevious)
 
-				observationPrevious = observation
-				observation = {}
-				observation[fundamental] = value
 
-				date_previous = date
+			# if ticker_previous == None:
+			# 	ticker_previous = ticker
+			# 	date_previous = date
 
-				curState = state(observedData)
-				action = agent.getAction(curState)
-				priceChange = curState.getScore()
-				reward = action * priceChange
-				agent.update(reward, curState, action)
-				print agent.getPercentCorrect()
-				print agent.getTotalRewards()
+			# if date == date_previous:
+			# 	observation[fundamental] = value
 
-				if (i%200000 == 0):
-					agent.finish()
+			# if date != date_previous:
+			# 	lineo += 1
+			# 	#print observation
+				
+			# 	observedData = dataParser.getObservation(observationPrevious, observation)
+			# 	observationPrevious = observation
+				
+			# 	observation = {}
+			# 	observation[fundamental] = value
+
+			# 	date_previous = date
+
+			# 	curState = state(observedData)
+			# 	action = agent.getAction(curState)
+			# 	priceChange = curState.getScore()
+			# 	reward = action * priceChange
+			# 	agent.update(reward, curState, action)
+			# 	print "hi"
+			# 	print agent.getPercentCorrect()
+			# 	print agent.getTotalRewards()
+
+			# 	if (i%200000 == 0):
+			# 		agent.finish()
 
 
 run()
