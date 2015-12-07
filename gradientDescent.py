@@ -166,13 +166,14 @@ def runSimulatedAnnealing():
 def runGeneticAlgorithm():
 	popN = 10 # n number of chromos per population
 	genesPerCh = 54
-	max_iterations = 10000
+	max_iterations = 1000
   	chromos = geneticAlgorithm.generatePop(popN) #generate new population of random chromosomes
   	iterations = 0
 
   	while iterations != max_iterations:
-  		if (iterations == 2):
+  		if (iterations == 1000):
 	 		rankedPop = geneticAlgorithm.rankPop(chromos) 
+	 		print rankedPop
 	  		chromos = []
 	  		agent = geneticAlgorithm.iteratePop(rankedPop, popN, True)
 	  		break
@@ -187,7 +188,7 @@ def runGeneticAlgorithm():
 
 
 #runStochasticDescent()
-runSimulatedAnnealing()
-#runGeneticAlgorithm()
+#runSimulatedAnnealing()
+runGeneticAlgorithm()
 
 
