@@ -2,6 +2,7 @@ import random, util, time
 import copy
 import gradientParser
 
+
 #bucket ranges for different metrics
 buckets = dict()
 for i in range(55):
@@ -57,6 +58,10 @@ class qAgent():
 		self.alpha = alpha
 		self.discount = gamma
 		self.qValues = util.Counter()
+		self.inTesting = False
+		self.testRewards = 0
+		self.testCorrect = 0
+		self.testWrong = 0
 
 	def getQValue(self, state, action):
 		value = self.qValues[(state.getDef(), action)]
@@ -107,21 +112,87 @@ class qAgent():
 		self.qValues[(state.getDef(), action)] = addVal
 
 	def getPercentCorrect(self):
-		return float(self.numCorrect) / float(self.numCorrect + self.numWrong)
+		if (self.inTesting):
+			return float(self.testCorrect) / float(self.test + self.testWrong)
+		else:
+			return float(self.numCorrect) / float(self.numCorrect + self.numWrong)
 
 	def getTotalRewards(self):
-		return self.totalRewards
+		if (self.inTesting):
+			return self.testRewards
+		else:
+			return self.totalRewards
 
 	def finish(self):
 		print ("DONE")
 		print (self.totalRewards)
+
+	def setTestingOn(self):
+		self.epsilon = 0.0    
+		self.alpha = 0.0      
+
+# def runInnerLoop(selectedKeys):
+# 	agent = qAgent()
+# 	reward = 0
+# 	correct = 0
+# 	# open data row by row to avoid memory overflow
+# 	fname = 'data_cleaned.csv'
+# 	with open(fname, 'r+') as f:
+# 		# this reads in one line at a time from stdin
+# 		date_previous = None 
+# 		ticker_previous = None
+
+# 		observation = {}
+# 		observationPrevious = {}
+# 		isFirstObservation = True
+
+# 		lineo = 0
+
+# 		for i, line in enumerate(f):
+# 			#print line
+# 			fList = line.split(",")
+# 			date = fList[0]
+# 			value = float(fList[1])
+# 			ticker = str(fList[2])
+# 			fundamental = str(fList[3])
+# 			lineo += 1
+# 			if (lineo == 10000):
+# 				break
+
+# 			if (date_previous == None):
+# 				date_previous = date
+# 			elif (date_previous != date):
+# 				if (not isFirstObservation):
+# 					#break
+# 					observedData = gradientParser.getObservation(observationPrevious, observation, selectedKeys)
+# 					curState = state(observedData)
+# 					action = agent.getAction(curState)
+# 					priceChange = curState.getScore()
+# 					reward = action * priceChange
+# 					agent.update(reward, curState, action)
+# 					reward = agent.getTotalRewards()
+# 					correct = agent.getPercentCorrect()
+# 				else:
+# 					isFirstObservation = False
+# 				observationPrevious = copy.deepcopy(observation)
+# 				observation = {}
+# 				date_previous = date
+
+# 			if (ticker_previous == None):
+# 				ticker_previous = ticker
+# 			elif (ticker_previous != ticker):
+# 				isFirstObservation = True
+# 				ticker_previous = ticker
+
+# 			observation[fundamental] = value
+# 	return [reward, correct]
 
 def runInnerLoop(selectedKeys):
 	agent = qAgent()
 	reward = 0
 	correct = 0
 	# open data row by row to avoid memory overflow
-	fname = 'data_cleaned.csv'
+	fname = 'data_ARQ_price.csv'
 	with open(fname, 'r+') as f:
 		# this reads in one line at a time from stdin
 		date_previous = None 
@@ -132,36 +203,20 @@ def runInnerLoop(selectedKeys):
 		isFirstObservation = True
 
 		lineo = 0
+		currentPriceDict = dict()
+		currentDateList = []
 
 		for i, line in enumerate(f):
-			#print line
-			fList = line.split(",")
-			date = fList[0]
-			value = float(fList[1])
-			ticker = str(fList[2])
-			fundamental = str(fList[3])
 			lineo += 1
 			if (lineo == 10000):
 				break
 
-			if (date_previous == None):
-				date_previous = date
-			elif (date_previous != date):
-				if (not isFirstObservation):
-					#break
-					observedData = gradientParser.getObservation(observationPrevious, observation, selectedKeys)
-					curState = state(observedData)
-					action = agent.getAction(curState)
-					priceChange = curState.getScore()
-					reward = action * priceChange
-					agent.update(reward, curState, action)
-					reward = agent.getTotalRewards()
-					correct = agent.getPercentCorrect()
-				else:
-					isFirstObservation = False
-				observationPrevious = copy.deepcopy(observation)
-				observation = {}
-				date_previous = date
+			fList = line.split(",")
+			date = fList[0]
+			value = float(fList[1])
+			ticker = str(fList[2])
+			#add the -1 thing to get rid of newline character
+			fundamental = str(fList[3])[:-1]
 
 			if (ticker_previous == None):
 				ticker_previous = ticker
@@ -169,6 +224,37 @@ def runInnerLoop(selectedKeys):
 				isFirstObservation = True
 				ticker_previous = ticker
 
-			observation[fundamental] = value
-	return [reward, correct]
+			if (fundamental == '"PRICE"'):
+				currentDateList.append(date)
+				currentPriceDict[hash(date)] = value
+			else:
+				if (date_previous != date):
+					if (not isFirstObservation):
+						try:
+							index = currentDateList.index(date)
+						except:
+							index = None
+						if (index):
+							observation['"PRICE"'] = currentPriceDict[hash(currentDateList[index])]
+							if (index + 3 >= len(currentDateList)):
+								index = len(currentDateList) - 1
+							else:
+								index = index + 3
+							observation['"PRICENEXT"'] = currentPriceDict[hash(currentDateList[index])]
+							observedData = gradientParser.getObservation(observationPrevious, observation, selectedKeys)
+							curState = state(observedData)
+							action = agent.getAction(curState)
+							priceChange = curState.getScore()
+							reward = action * priceChange
+							agent.update(reward, curState, action)
+							reward = agent.getTotalRewards()
+							correct = agent.getPercentCorrect()
+					else:
+						isFirstObservation = False
+					observationPrevious = copy.deepcopy(observation)
+					observation = {}
+					date_previous = date
 
+			observation[fundamental] = value
+
+	return [reward, correct, agent]

@@ -39,7 +39,7 @@ def getItems(sortedDict):
 # return a single ticker/date combination with all parameters
 def getObservation(data1, data2, keys):
 	#make sure to add a check to make sure both observations have all the data
-	#keys = ['"ACCOCI"', '"ASSETS"', '"ASSETSC"', '"ASSETSNC"', '"BVPS"', '"CAPEX"', '"CASHNEQ"', '"COR"', '"CURRENTRATIO"', '"DE"', '"DEBT"', '"DEPAMOR"', '"DILUTIONRATIO"', '"DPS"', '"EBIT"', '"EBITDA"', '"EBT"', '"EPS"', '"EPSDIL"', '"EQUITY"', '"FCF"', '"FCFPS"', '"GP"', '"INTANGIBLES"', '"INTEXP"', '"INVENTORY"', '"LIABILITIES"', '"LIABILITIESC"', '"LIABILITIESNC"', '"NCF"', '"NCFCOMMON"', '"NCFDEBT"', '"NCFDIV"', '"NCFF"', '"NCFI"', '"NCFO"', '"NCFX"', '"NETINC"', '"NETINCCMN"', '"NETINCDIS"', '"PAYABLES"', '"PB"', '"PREFDIVIS"', '"PRICE"', '"RECEIVABLES"', '"RETEARN"', '"REVENUE"', '"RND"', '"SGNA"', '"SHARESWA"', '"SHARESWADIL"', '"TANGIBLES"', '"TAXEXP"', '"TBVPS"', '"WORKINGCAPITAL"']
+	allKeys = ['"ACCOCI"', '"ASSETS"', '"ASSETSC"', '"ASSETSNC"', '"BVPS"', '"CAPEX"', '"CASHNEQ"', '"COR"', '"CURRENTRATIO"', '"DE"', '"DEBT"', '"DEPAMOR"', '"DILUTIONRATIO"', '"DPS"', '"EBIT"', '"EBITDA"', '"EBT"', '"EPS"', '"EPSDIL"', '"EQUITY"', '"FCF"', '"FCFPS"', '"GP"', '"INTANGIBLES"', '"INTEXP"', '"INVENTORY"', '"LIABILITIES"', '"LIABILITIESC"', '"LIABILITIESNC"', '"NCF"', '"NCFCOMMON"', '"NCFDEBT"', '"NCFDIV"', '"NCFF"', '"NCFI"', '"NCFO"', '"NCFX"', '"NETINC"', '"NETINCCMN"', '"NETINCDIS"', '"PAYABLES"', '"PB"', '"PREFDIVIS"', '"PRICE"', '"RECEIVABLES"', '"RETEARN"', '"REVENUE"', '"RND"', '"SGNA"', '"SHARESWA"', '"SHARESWADIL"', '"TANGIBLES"', '"TAXEXP"', '"TBVPS"', '"WORKINGCAPITAL"']
 	#keys = ['"PRICE"']
 
 	# Price removed
@@ -51,18 +51,22 @@ def getObservation(data1, data2, keys):
 	data1Complete = {}
 	data2Complete = {}
 
-	for key in keys:
-		try:
-			data1[key]
-			data1Complete[key] = data1[key]
-		except:
+	for key in allKeys:
+		if (key not in keys):
 			data1Complete[key] = None
-
-		try:
-			data2[key]
-			data2Complete[key] = data2[key]
-		except:
 			data2Complete[key] = None
+		else:
+			try:
+				data1[key]
+				data1Complete[key] = data1[key]
+			except:
+				data1Complete[key] = None
+			try:
+				data2[key]
+				data2Complete[key] = data2[key]
+			except:
+				data2Complete[key] = None
+
 
 	data1Complete_sorted = collections.OrderedDict(sorted(data1Complete.items()))
 	data2Complete_sorted = collections.OrderedDict(sorted(data2Complete.items()))
@@ -71,9 +75,8 @@ def getObservation(data1, data2, keys):
 	nextData = getItems(data2Complete_sorted.items());
 
 	percentChanges = getPercentChanges(data,nextData)
-	
-	curPrice = data1Complete['"PRICE"']
-	nextPrice = data2Complete['"PRICE"']
+	curPrice = data2['"PRICE"']
+	nextPrice = data2['"PRICENEXT"']
 	
 	# print "DATA"
 	# print data1

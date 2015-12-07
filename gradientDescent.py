@@ -38,8 +38,7 @@ def runStochasticDescent():
 		result = myownq.runInnerLoop(selectedKeys)
 		fScoreRewards[hashVal] = result[0]
 		fScoreCorrect[hashVal] = result[1]
-		print (fScoreRewards[hashVal])
-		print (fScoreCorrect[hashVal])
+		agent = result[2]
 		visited.append(hashVal)
 		move = False
 		if (len(previousState.keys()) == 0):
@@ -52,12 +51,15 @@ def runStochasticDescent():
 			previousState["hash"] = hashVal
 			previousState["selected"] = selectedKeys
 			previousState["remaining"] = remainingKeys
+			print (fScoreRewards[hashVal])
+			print (fScoreCorrect[hashVal])
 			if (len(maxState.keys()) == 0 or fScoreRewards[hashVal] > maxState["score"]):
 				maxState["hash"] = hashVal
 				maxState["selected"] = selectedKeys
 				maxState["remaining"] = remainingKeys
 				maxState["score"] = fScoreRewards[hashVal]
 				maxState["correct"] = fScoreCorrect[hashVal]
+				maxState["agent"] = agent
 
 		repeatedState= True
 		while (repeatedState):
@@ -109,6 +111,7 @@ def runSimulatedAnnealing():
 		result = myownq.runInnerLoop(selectedKeys)
 		fScoreRewards[hashVal] = result[0]
 		fScoreCorrect[hashVal] = result[1]
+		agent = result[2]
 		visited.append(hashVal)
 
 		move = False
@@ -133,6 +136,7 @@ def runSimulatedAnnealing():
 				maxState["remaining"] = remainingKeys
 				maxState["score"] = fScoreRewards[hashVal]
 				maxState["correct"] = fScoreCorrect[hashVal]
+				maxState["agent"] = agent
 
 		repeatedState= True
 		while (repeatedState):
@@ -160,26 +164,30 @@ def runSimulatedAnnealing():
 	print (maxState)
 
 def runGeneticAlgorithm():
-	popN = 100 # n number of chromos per population
+	popN = 10 # n number of chromos per population
 	genesPerCh = 54
 	max_iterations = 10000
   	chromos = geneticAlgorithm.generatePop(popN) #generate new population of random chromosomes
   	iterations = 0
 
   	while iterations != max_iterations:
+  		if (iterations == 2):
+	 		rankedPop = geneticAlgorithm.rankPop(chromos) 
+	  		chromos = []
+	  		agent = geneticAlgorithm.iteratePop(rankedPop, popN, True)
+	  		break
 		# take the pop of random chromos and rank them based on their fitness score/proximity to target output
 		rankedPop = geneticAlgorithm.rankPop(chromos) 
 		#print rankedPop
-		# print '\nCurrent iterations:', iterations
+
   		chromos = []
-  		chromos = geneticAlgorithm.iteratePop(rankedPop, popN)
+  		chromos = geneticAlgorithm.iteratePop(rankedPop, popN, False)
 		
   		iterations += 1
-  		if (iterations == 1000):
-	 		break
 
-#runStochasticDescent()
+
+runStochasticDescent()
 #runSimulatedAnnealing()
-runGeneticAlgorithm()
+#runGeneticAlgorithm()
 
 

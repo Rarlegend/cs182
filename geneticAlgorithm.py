@@ -53,7 +53,7 @@ def rankPop (chromos):
 			errors.append(scores[0])
 		results.append(scores)
 		#print scores
-	print errors
+	#print errors
 
 	fitnessScores = calcFitness (errors) # calc fitness scores from the erros calculated
 	pairedPop = zip ( chromos, errors, results, fitnessScores) # pair each chromo with its protein, ouput and fitness score
@@ -119,22 +119,26 @@ def breed (ch1, ch2):
 	return newnewCh1, newnewCh2
 
 """ Taking a ranked population return a new population by breeding the ranked one"""
-def iteratePop (rankedPop, popN):
+def iteratePop (rankedPop, popN, getBestAgent):
 	fitnessScores = [ item[-1] for item in rankedPop ] # extract fitness scores from ranked population
 	rankedChromos = [ item[0] for item in rankedPop ] # extract chromosomes from ranked population
+	scores = [ item[1] for item in rankedPop ]
+	if (getBestAgent):
+		maxIndex = scores.index(max(scores))
+		return rankedPop[maxIndex][2][-1]
+	else:
+		newpop = []
+		numElites = popN/8
+		if (numElites < 1):
+			numElites = 1
+		newpop.extend(rankedChromos[:numElites]) # known as elitism, conserve the best solutions to new population
 
-	newpop = []
-	numElites = popN/8
-	if (numElites < 1):
-		numElites = 1
-	newpop.extend(rankedChromos[:numElites]) # known as elitism, conserve the best solutions to new population
-
-	while len(newpop) != popN:
-		ch1, ch2 = [], []
-		ch1, ch2 = selectFittest (fitnessScores, rankedChromos) # select two of the fittest chromos
-		
-		ch1, ch2 = breed (ch1, ch2) # breed them to create two new chromosomes 
-		newpop.append(ch1) # and append to new population
-		newpop.append(ch2)
-	return newpop
+		while len(newpop) < popN:
+			ch1, ch2 = [], []
+			ch1, ch2 = selectFittest (fitnessScores, rankedChromos) # select two of the fittest chromos
+			
+			ch1, ch2 = breed (ch1, ch2) # breed them to create two new chromosomes 
+			newpop.append(ch1) # and append to new population
+			newpop.append(ch2)
+		return newpop
 

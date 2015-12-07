@@ -1,33 +1,79 @@
-from pandas import *
-import numpy as np
-from sklearn.grid_search import GridSearchCV
-import sklearn.cross_validation as cv
-import sklearn.metrics as metrics
-from sklearn.svm import l1_min_c
-from sklearn.linear_model import Lasso, LassoCV, LogisticRegression
-import scipy.linalg as la
-from math import pi
-import matplotlib.pyplot as plt
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
-from patsy import dmatrix
-import re
-import os
-import math
-#from tdm_df import tdm_df
+import json 
+import csv
+import collections
+import sys
+import random, util, time
+import copy
+import gradientParser
 
-x = [[1,2],[2,3],[4,5],[8,9]]
-y = [1,4,6,7]
+totalSum = 0
+totalPlus = 0
+totalMinus = 0
+fname = 'data_ARQ_price.csv'
+with open(fname, 'r+') as f:
+		# this reads in one line at a time from stdin
+		date_previous = None 
+		ticker_previous = None
 
-lasso_model = LassoCV(cv=3)
-lasso_fit = lasso_model.fit(x, y)
+		observation = {}
+		observationPrevious = {}
+		isFirstObservation = True
 
+		lineo = 0
+		currentPriceDict = dict()
+		currentDateList = []
 
-plt.plot(-np.log(lasso_fit.alphas_), np.sqrt(lasso_fit.mse_path_), alpha = .5)
-plt.plot(-np.log(lasso_fit.alphas_), np.sqrt(lasso_fit.mse_path_).mean(axis = 1), 
-         lw = 2, color = 'black')
-plt.ylim(0, 60)
-plt.xlim(0, np.max(-np.log(lasso_fit.alphas_)))
-plt.title('Lasso regression RMSE')
-plt.xlabel(r'$-\log(\lambda)$')
-plt.ylabel('RMSE (and avg. across folds)')
+		for i, line in enumerate(f):
+			lineo += 1
+			if (lineo == 10000):
+				break
+
+			fList = line.split(",")
+			date = fList[0]
+			value = float(fList[1])
+			ticker = str(fList[2])
+			#add the -1 thing to get rid of newline character
+			fundamental = str(fList[3])[:-1]
+
+			if (ticker_previous == None):
+				ticker_previous = ticker
+			elif (ticker_previous != ticker):
+				isFirstObservation = True
+				ticker_previous = ticker
+
+			if (fundamental == '"PRICE"'):
+				currentDateList.append(date)
+				currentPriceDict[hash(date)] = value
+			else:
+				if (date_previous != date):
+					if (not isFirstObservation):
+						try:
+							index = currentDateList.index(date)
+						except:
+							index = None
+						if (index):
+							observation['"PRICE"'] = currentPriceDict[hash(currentDateList[index])]
+							if (index + 3 >= len(currentDateList)):
+								index = len(currentDateList) - 1
+							else:
+								index = index + 3
+							observation['"PRICENEXT"'] = currentPriceDict[hash(currentDateList[index])]
+							
+
+							change = observation['"PRICENEXT"'] - observation['"PRICE"']
+							totalSum += change
+							if (observation['"PRICENEXT"'] > observation['"PRICE"']):
+								totalPlus += change
+							else:
+								totalMinus += change
+					else:
+						isFirstObservation = False
+					observationPrevious = copy.deepcopy(observation)
+					observation = {}
+					date_previous = date
+
+			observation[fundamental] = value
+print totalSum
+print totalPlus
+print totalMinus
+print totalPlus - totalMinus
