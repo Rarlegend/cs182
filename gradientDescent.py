@@ -106,7 +106,7 @@ def runSimulatedAnnealing():
 	visited = []
 	maxState = dict()
 
-	for x in range(1,100000):
+	for x in range(1,10000):
 
 		result = myownq.runInnerLoop(selectedKeys)
 		fScoreRewards[hashVal] = result[0]
