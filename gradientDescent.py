@@ -62,8 +62,11 @@ def runStochasticDescent():
 				maxState["correct"] = fScoreCorrect[hashVal]
 				maxState["agent"] = agent
 
-		repeatedState= True
+		repeatedState = True
+		numRepeatedStates = 0
+		STOPIT = False
 		while (repeatedState):
+			numRepeatedStates += 1
 			hashVal = previousState["hash"]
 			selectedKeys = previousState["selected"]
 			remainingKeys = previousState["remaining"]
@@ -84,6 +87,11 @@ def runStochasticDescent():
 			hashVal = hash(tuple(selectedKeys))
 			if (hashVal not in visited):
 				repeatedState = False
+			if (numRepeatedStates >=1000):
+				STOPIT = True
+				break
+		if (STOPIT):
+			break
 	print ("FINAL SOLUTION")
 	print (maxState)
 
@@ -140,7 +148,10 @@ def runSimulatedAnnealing():
 				maxState["agent"] = agent
 
 		repeatedState= True
+		numRepeatedStates = 0
+		STOPIT = False
 		while (repeatedState):
+			numRepeatedStates += 1
 			hashVal = previousState["hash"]
 			selectedKeys = previousState["selected"]
 			remainingKeys = previousState["remaining"]
@@ -161,6 +172,11 @@ def runSimulatedAnnealing():
 			hashVal = hash(tuple(selectedKeys))
 			if (hashVal not in visited):
 				repeatedState = False
+			if (numRepeatedStates >=1000):
+				STOPIT = True
+				break
+		if (STOPIT):
+			break
 	print ("FINAL SOLUTION")
 	print (maxState)
 
