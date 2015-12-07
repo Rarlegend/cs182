@@ -5,6 +5,7 @@ import math
 import geneticAlgorithm
 
 
+allKeys = keys = ['"ACCOCI"', '"ASSETS"', '"ASSETSC"', '"ASSETSNC"', '"BVPS"', '"CAPEX"', '"CASHNEQ"', '"COR"', '"CURRENTRATIO"', '"DE"', '"DEBT"', '"DEPAMOR"', '"DILUTIONRATIO"', '"DPS"', '"EBIT"', '"EBITDA"', '"EBT"', '"EPS"', '"EPSDIL"', '"EQUITY"', '"FCF"', '"FCFPS"', '"GP"', '"INTANGIBLES"', '"INTEXP"', '"INVENTORY"', '"LIABILITIES"', '"LIABILITIESC"', '"LIABILITIESNC"', '"NCF"', '"NCFCOMMON"', '"NCFDEBT"', '"NCFDIV"', '"NCFF"', '"NCFI"', '"NCFO"', '"NCFX"', '"NETINC"', '"NETINCCMN"', '"NETINCDIS"', '"PAYABLES"', '"PB"', '"PREFDIVIS"', '"RECEIVABLES"', '"RETEARN"', '"REVENUE"', '"RND"', '"SGNA"', '"SHARESWA"', '"SHARESWADIL"', '"TANGIBLES"', '"TAXEXP"', '"TBVPS"', '"WORKINGCAPITAL"']
 
 
 
@@ -164,18 +165,26 @@ def runSimulatedAnnealing():
 	print (maxState)
 
 def runGeneticAlgorithm():
-	popN = 10 # n number of chromos per population
+	popN = 100 # n number of chromos per population
 	genesPerCh = 54
 	max_iterations = 1000
   	chromos = geneticAlgorithm.generatePop(popN) #generate new population of random chromosomes
   	iterations = 0
 
-  	while iterations != max_iterations:
-  		if (iterations == 1000):
+  	while True:
+  		if (iterations == max_iterations):
 	 		rankedPop = geneticAlgorithm.rankPop(chromos) 
-	 		print rankedPop
+	 		#print(len(rankedPop))
+	 		#print rankedPop
 	  		chromos = []
 	  		agent = geneticAlgorithm.iteratePop(rankedPop, popN, True)
+	  		listKeys = agent[0]
+	  		keyNames = []
+	  		for i in range(len(listKeys)):
+	  			if (listKeys[i] == 1):
+	  				keyNames.append(allKeys[i])
+	  		print agent
+	  		print keyNames
 	  		break
 		# take the pop of random chromos and rank them based on their fitness score/proximity to target output
 		rankedPop = geneticAlgorithm.rankPop(chromos) 

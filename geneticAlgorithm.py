@@ -125,7 +125,9 @@ def iteratePop (rankedPop, popN, getBestAgent):
 	scores = [ item[1] for item in rankedPop ]
 	if (getBestAgent):
 		maxIndex = scores.index(max(scores))
-		return rankedPop[maxIndex][2][-1]
+		print "INDEX"
+		print maxIndex
+		return rankedPop[maxIndex]
 	else:
 		newpop = []
 		numElites = popN/8
@@ -133,12 +135,13 @@ def iteratePop (rankedPop, popN, getBestAgent):
 			numElites = 1
 		newpop.extend(rankedChromos[:numElites]) # known as elitism, conserve the best solutions to new population
 
-		while len(newpop) < popN:
+		while popN > len(newpop):
 			ch1, ch2 = [], []
 			ch1, ch2 = selectFittest (fitnessScores, rankedChromos) # select two of the fittest chromos
 			
 			ch1, ch2 = breed (ch1, ch2) # breed them to create two new chromosomes 
 			newpop.append(ch1) # and append to new population
 			newpop.append(ch2)
+		print len(newpop)
 		return newpop
 
