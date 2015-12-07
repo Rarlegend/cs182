@@ -186,8 +186,8 @@ def runGeneticAlgorithm():
   		iterations += 1
 
 
-runStochasticDescent()
-#runSimulatedAnnealing()
+#runStochasticDescent()
+runSimulatedAnnealing()
 #runGeneticAlgorithm()
 
 
