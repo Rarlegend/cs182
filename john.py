@@ -10,6 +10,9 @@ totalSum = 0
 totalPlus = 0
 totalMinus = 0
 fname = 'data_ARQ_price.csv'
+
+startLooking = False
+
 with open(fname, 'r+') as f:
 		# this reads in one line at a time from stdin
 		date_previous = None 
@@ -34,7 +37,6 @@ with open(fname, 'r+') as f:
 			ticker = str(fList[2])
 			#add the -1 thing to get rid of newline character
 			fundamental = str(fList[3])[:-1]
-
 			if (ticker_previous == None):
 				ticker_previous = ticker
 			elif (ticker_previous != ticker):
@@ -77,3 +79,9 @@ print totalSum
 print totalPlus
 print totalMinus
 print totalPlus - totalMinus
+
+#1583.48332793
+#4765
+
+#10253
+#30236

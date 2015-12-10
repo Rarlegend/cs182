@@ -3,10 +3,11 @@ import myownq
 import operator
 
 keys = ['"ACCOCI"', '"ASSETS"', '"ASSETSC"', '"ASSETSNC"', '"BVPS"', '"CAPEX"', '"CASHNEQ"', '"COR"', '"CURRENTRATIO"', '"DE"', '"DEBT"', '"DEPAMOR"', '"DILUTIONRATIO"', '"DPS"', '"EBIT"', '"EBITDA"', '"EBT"', '"EPS"', '"EPSDIL"', '"EQUITY"', '"FCF"', '"FCFPS"', '"GP"', '"INTANGIBLES"', '"INTEXP"', '"INVENTORY"', '"LIABILITIES"', '"LIABILITIESC"', '"LIABILITIESNC"', '"NCF"', '"NCFCOMMON"', '"NCFDEBT"', '"NCFDIV"', '"NCFF"', '"NCFI"', '"NCFO"', '"NCFX"', '"NETINC"', '"NETINCCMN"', '"NETINCDIS"', '"PAYABLES"', '"PB"', '"PREFDIVIS"', '"RECEIVABLES"', '"RETEARN"', '"REVENUE"', '"RND"', '"SGNA"', '"SHARESWA"', '"SHARESWADIL"', '"TANGIBLES"', '"TAXEXP"', '"TBVPS"', '"WORKINGCAPITAL"']
-crossover_rate = 0.7
+crossover_rate = 0.9
 mutation_rate = 0.05
+eliteFraction = 8
 
-"""Generates random population of chromos"""
+"""Generates random population of chromosomes"""
 def generatePop (popN):
 	chromos = []
 	listFundamentals = []
@@ -46,7 +47,7 @@ def rankPop (chromos):
 			if (chromo[i] == 1):
 				selectedKeys.append(keys[i])
 		selectedKeys.append('"PRICE"')
-		scores = myownq.runInnerLoop(selectedKeys)
+		scores = myownq.runInnerLoop(selectedKeys, myownq.qAgent())
 		if (scores[0] <= 0):
 			errors.append(1)
 		else:
@@ -86,12 +87,13 @@ def roulette (fitnessScores):
 		if cumalativeFitness > r: # in the event of cumalative fitness becoming greater than r, return index of that chromo
 			return i
 
+#crossover functions
 def crossover (ch1, ch2):
   	# at a random chiasma
   	r = random.randint(0,54)
   	return ch1[:r]+ch2[r:], ch2[:r]+ch1[r:]
 
-
+#mutate function
 def mutate (ch):
   	mutatedCh = []
 	for i in ch:
@@ -130,7 +132,7 @@ def iteratePop (rankedPop, popN, getBestAgent):
 		return rankedPop[maxIndex]
 	else:
 		newpop = []
-		numElites = popN/8
+		numElites = popN/eliteFraction
 		if (numElites < 1):
 			numElites = 1
 		newpop.extend(rankedChromos[:numElites]) # known as elitism, conserve the best solutions to new population

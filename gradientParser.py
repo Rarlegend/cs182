@@ -3,7 +3,7 @@ import csv
 import collections
 import sys
 
-# parse through data
+# parse through data to get percent changes between two observations
 def getPercentChanges(start, end):
 	percentChanges = []
 	for i in range(len(start)):
@@ -32,7 +32,7 @@ def getItems(sortedDict):
 	items = []
 	for i in sortedDict:
 		items.append(i[1])
-	
+
 	return items
 
 
